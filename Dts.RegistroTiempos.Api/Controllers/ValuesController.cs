@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dts.RegistroTiempos.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dts.RegistroTiempos.Api.Controllers
@@ -10,6 +11,13 @@ namespace Dts.RegistroTiempos.Api.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly IServiceEmpleado _serviceEmpleado;
+
+        public ValuesController(IServiceEmpleado serviceEmpleado)
+        {
+            this._serviceEmpleado = serviceEmpleado;
+        }
+
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
