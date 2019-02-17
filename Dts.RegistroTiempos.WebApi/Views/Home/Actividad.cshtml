@@ -1,0 +1,99 @@
+﻿
+@{
+    ViewData["Title"] = "Actividad";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<input type="hidden" id="idEmpleado" value="1" />
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                Actividades
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group row">
+                        <label for="txtDesc" class="col-sm-2 col-form-label">Descripción:</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="txtDesc" placeholder="Digitar descripcion">
+                        </div>
+                        <button type="button" id="btnAdd" class="btn btn-primary col-sm-2">Crear Actividad</button>
+                    </div>
+                </form>
+
+                <table id="datatable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Acciones</th>
+                            <th scope="col">Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            cargarDatosTabla();
+
+            $(document).on("click", "a.agregar", function () {
+                var r = confirm("Esta seguro que quiere agregar horas ?");
+                if (r == false) {
+                    return false;
+                } 
+            });
+
+            $("#btnAdd").click(function () {
+                var txtDesc = $("#txtDesc").val();
+                if (txtDesc == '') {
+                    alert("Debe ingresar la descripcion");
+                } else {
+                    guardarActividad();
+                }
+            });
+            
+        });
+
+        function cargarDatosTabla() {
+            // Send an AJAX request
+            $.getJSON('https://localhost:44357/api/Actividad/' + $("#idEmpleado").val())
+                .done(function (data) {
+                    $("#datatable > tbody").html("");
+                    // On success, 'data' contains a list.
+                    $.each(data, function (key, item) {
+                        $('#datatable > tbody:last-child').append('<tr><td><a href="/Home/Tiempos/' + item.id + '" name="addActividad" data-id="' + item.id + '" class="btn btn-primary btn-sm agregar">Agregar Horas</a></td><td>' + item.descripcion + '</td></tr>');
+                    });
+                });
+        }
+
+        function guardarActividad() {
+            $.ajax({
+                contentType: 'application/json',
+                type: "POST",
+                url: "https://localhost:44357/api/Actividad",
+                data: JSON.stringify({
+                    Descripcion: $("#txtDesc").val(),
+                    EmpleadoId: $("#idEmpleado").val()
+                }),
+                success: function (data, textStatus, jqXHR) {
+                    if (textStatus == 'success') {
+                        $("#txtDesc").val("");
+                        cargarDatosTabla();
+                    } else {
+                        alert("Error guardando la actividad");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.statusText);
+                }
+            });
+            
+        }
+    </script>
+}
+

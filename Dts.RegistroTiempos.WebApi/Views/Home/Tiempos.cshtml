@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewData["Title"] = "Tiempos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var idActividad = ViewData["idActividad"];
+}
+
+<input type="hidden" id="idActividad" value="@idActividad" />
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                Actividades
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group row">
+                        <label for="txtDate" class="col-sm-1 col-form-label">Fecha:</label>
+                        <div class="col-sm-4">
+                            <input type="date" class="form-control" id="txtDate" placeholder="Fecha">
+                        </div>
+                        <label for="txtHoras" class="col-sm-1 col-form-label">Horas:</label>
+                        <div class="col-sm-4">
+                            <input type="number" class="form-control" id="txtHoras" placeholder="Horas" value="1">
+                        </div>
+                        <button type="button" id="btnAdd" class="btn btn-primary col-sm-2">Agregar</button>
+                    </div>
+                </form>
+
+                <table id="datatable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Tiempo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <a href="/Home/Actividad" class="btn btn-primary btn-sm">Regresar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var idActividad = $("#idActividad").val();
+            if (idActividad <= 0) {
+                window.location.replace("https://localhost:44357/Home/Actividad");
+            }
+
+            cargarDatosTabla(idActividad);
+
+            $("#btnAdd").click(function () {
+                var txtDate = $("#txtDate").val();
+                var txtHoras = $("#txtHoras").val();
+                if (txtDate == '' || txtHoras == 0) {
+                    alert("Debe ingresar la informacion completa");
+                } else {
+                    if ((sumarColumna() + parseInt(txtHoras)) > 8) {
+                        alert("La suma de lasa horas no puede ser superior a 8");
+                    } else {
+                        guardarActividad(idActividad, txtDate, txtHoras);
+                    }
+                }
+            });
+
+        });
+
+        function cargarDatosTabla(idActividad) {
+            // Send an AJAX request
+            $.getJSON('https://localhost:44357/api/Tiempo/' + idActividad)
+                .done(function (data) {
+                    $("#datatable > tbody").html("");
+                    // On success, 'data' contains a list.
+                    $.each(data, function (key, item) {
+                        $('#datatable > tbody:last-child').append('<tr><td>' + item.fecha + '</td><td class="hora">' + item.hora + '</td></tr>');
+                    });
+                });
+        }
+
+        function guardarActividad(idActividad, txtDate, txtHoras) {
+            $.ajax({
+                contentType: 'application/json',
+                type: "POST",
+                url: "https://localhost:44357/api/Tiempo",
+                data: JSON.stringify({
+                    Fecha: txtDate,
+                    Hora: txtHoras,
+                    ActividadId: idActividad
+                }),
+                success: function (data, textStatus, jqXHR) {
+                    if (textStatus == 'success') {
+                        cargarDatosTabla(idActividad);
+                    } else {
+                        alert("Error guardando el tiempo");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.statusText);
+                }
+            });
+
+        }
+
+        function sumarColumna() {
+            var sum = 0;
+            // iterate through each td based on class and add the values
+            $(".hora").each(function () {
+
+                var value = $(this).text();
+                // add only if the value is number
+                if (!isNaN(value) && value.length != 0) {
+                    sum += parseFloat(value);
+                }
+            });
+
+            return sum;
+        }
+    </script>
+}
+

@@ -20,6 +20,17 @@ namespace Dts.RegistroTiempos.WebApi.Controllers
             return View();
         }
 
+        public IActionResult Actividad()
+        {
+            return View();
+        }
+
+        public IActionResult Tiempos(int id)
+        {
+            ViewData["idActividad"] = id;
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
